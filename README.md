@@ -4,7 +4,8 @@ Collaborators: Max Andersson , Linus Eriksson and Erik Lindberg
 
 Communication : https://accproject.slack.com/
 
-Achitechture in progress : https://www.overleaf.com/read/ndvtbzhpkdrw read only 
-https://www.overleaf.com/3414859jmwwqg read & edit
+Achitechture in progress : https://www.overleaf.com/read/ndvtbzhpkdrw (read only) 
+
+https://www.overleaf.com/3414859jmwwqg (read & edit)
 
 Issue Tracking: Github
