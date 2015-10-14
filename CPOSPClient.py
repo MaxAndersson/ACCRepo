@@ -158,41 +158,43 @@ print config_dict
 
 #####  -------  IMAGE CONFIG --------- #####
 
-print "CONFIG setup"
-# user
+print "IMAGE config setup"
+# Image
 print "What image do you want to use? Suggested: [Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
-user = raw_input(prompt)
+image = raw_input(prompt)
 
-#USERNAME
-print "What is your key?" 
-key = raw_input(prompt)
+# flavor
+print "What flavor do you want to use? Suggested: [m1.medium]" 
+flavor = raw_input(prompt)
 
-#PASSWORD
-print "What is your tenant_name?" 
-tenant_name = raw_input(prompt)
+# network
+print "What network do you want to use? Suggested: [ACC-Course-net]" 
+network = raw_input(prompt)
 
-#TENANT_NAME
-print "What is your authurl?" 
-authurl = raw_input(prompt)
+# Image
+print "What keypair do you want to use?" 
+keypair = raw_input(prompt)
 
-config_dict = {"user" : user, "key": key, "tenant_name": tenant_name, "authurl": authurl}
+image_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair}
 
 
 
 print """
-user: %r 
-key %r 
-auth_url: %r 
-authurl %r 
-""" % (user, key, tenant_name, authurl)
+image: %r 
+flavor %r 
+network: %r 
+keypair %r 
+""" % (image, flavor, network, keypair)
 
-print config_dict
+print image_config_dict
 
-
+'''
 image =                          image.id, 
                                  flavor = flavor.id, 
                                  network = network.id, 
                                  key_name = keypair.name,
+'''
+
 
 
 
