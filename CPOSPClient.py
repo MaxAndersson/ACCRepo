@@ -7,21 +7,15 @@ from collections import OrderedDict
 import collections
 import installSoftware
 
-
+#OPTION 1
 # Option for CLI interface that i look into: http://docs.openstack.org/developer/cliff/introduction.html
 #http://docs.openstack.org/developer/cliff/classes.html#cliff.app.App
+#sudo pip install cliff
+#https://github.com/kennethreitz/clint
+#Får det icke att fungera.. kollar mer senare.
 
-
-
-
-#Check username etc.
-#Authenticate
-# Username, Tenant_name, project_name, 
-# Nr. Workers
-#Return dict
-
-
-
+#OPTION 2
+#http://click.pocoo.org/5/
 
 #From MOLNS possible to use?
 '''
@@ -87,5 +81,120 @@ class OpenStackProvider(OpenStackBase):
             }
 
 '''
+
+#Easywayout.
+from sys import argv
+
+prompt = '> '
+
+#AUTH
+
+print "AUTH setup"
+# AUTH_URL
+print "What is your auth_url?" 
+auth_url = raw_input(prompt)
+
+#USERNAME
+print "What is your username?" 
+username = raw_input(prompt)
+
+#PASSWORD
+print "What is your password?" 
+password = raw_input(prompt)
+
+#TENANT_NAME
+print "What is your tenant_name?" 
+tenant_name = raw_input(prompt)
+
+auth_dict = {"auth_url" : auth_url, "username": username, "password": password, "tenant_name": tenant_name}
+
+
+print """
+auth_url: %r 
+username %r 
+password: %r 
+tenant_name %r 
+""" % (auth_url, username, password, tenant_name)
+
+print auth_dict
+'''
+config = {'user':os.environ['OS_USERNAME'], 
+          'key':os.environ['OS_PASSWORD'],
+          'tenant_name':os.environ['OS_TENANT_NAME'],
+          'authurl':os.environ['OS_AUTH_URL']}
+
+'''
+#####  -------  CONFIG --------- #####
+
+print "CONFIG setup"
+# user
+print "What is your username?" 
+user = raw_input(prompt)
+
+#USERNAME
+print "What is your key?" 
+key = raw_input(prompt)
+
+#PASSWORD
+print "What is your tenant_name?" 
+tenant_name = raw_input(prompt)
+
+#TENANT_NAME
+print "What is your authurl?" 
+authurl = raw_input(prompt)
+
+config_dict = {"user" : user, "key": key, "tenant_name": tenant_name, "authurl": authurl}
+
+
+
+print """
+user: %r 
+key %r 
+auth_url: %r 
+authurl %r 
+""" % (user, key, tenant_name, authurl)
+
+print config_dict
+
+#####  -------  IMAGE CONFIG --------- #####
+
+print "CONFIG setup"
+# user
+print "What image do you want to use? Suggested: [Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
+user = raw_input(prompt)
+
+#USERNAME
+print "What is your key?" 
+key = raw_input(prompt)
+
+#PASSWORD
+print "What is your tenant_name?" 
+tenant_name = raw_input(prompt)
+
+#TENANT_NAME
+print "What is your authurl?" 
+authurl = raw_input(prompt)
+
+config_dict = {"user" : user, "key": key, "tenant_name": tenant_name, "authurl": authurl}
+
+
+
+print """
+user: %r 
+key %r 
+auth_url: %r 
+authurl %r 
+""" % (user, key, tenant_name, authurl)
+
+print config_dict
+
+
+image =                          image.id, 
+                                 flavor = flavor.id, 
+                                 network = network.id, 
+                                 key_name = keypair.name,
+
+
+
 
 
