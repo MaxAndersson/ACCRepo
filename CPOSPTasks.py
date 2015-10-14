@@ -18,9 +18,10 @@ def cellprofiler_work(self):
 	return x
 
 
+#load and source rc file? 
 # Hämta data  (från public object storage)
 # Separera datan..?
 # Köra cellprofiler
-# Forsla ut data igen!   VIlket format... csv eller mysql?
+# Forsla ut data igen!   Vilket format... csv eller mysql?
 # Till databas eller concata csv filer
 # Till public object storage?

@@ -86,7 +86,7 @@ class OpenStackProvider(OpenStackBase):
 from sys import argv
 
 prompt = '> '
-
+'''
 #AUTH
 
 print "AUTH setup"
@@ -118,6 +118,7 @@ tenant_name %r
 
 print auth_dict
 '''
+'''
 config = {'user':os.environ['OS_USERNAME'], 
           'key':os.environ['OS_PASSWORD'],
           'tenant_name':os.environ['OS_TENANT_NAME'],
@@ -143,7 +144,7 @@ tenant_name = raw_input(prompt)
 print "What is your authurl?" 
 authurl = raw_input(prompt)
 
-config_dict = {"user" : user, "key": key, "tenant_name": tenant_name, "authurl": authurl}
+config_dict = {"username" : user, "api_key": key, "project_id": tenant_name, "auth_url": authurl}
 
 
 
@@ -156,7 +157,7 @@ authurl %r
 
 print config_dict
 
-#####  -------  IMAGE CONFIG --------- #####
+#####  -------  SERVER CONFIG --------- #####
 
 print "IMAGE config setup"
 # Image
@@ -175,7 +176,7 @@ network = raw_input(prompt)
 print "What keypair do you want to use?" 
 keypair = raw_input(prompt)
 
-image_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair}
+server_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair}
 
 
 
@@ -186,7 +187,7 @@ network: %r
 keypair %r 
 """ % (image, flavor, network, keypair)
 
-print image_config_dict
+print server_config_dict
 
 '''
 image =                          image.id, 
@@ -195,7 +196,52 @@ image =                          image.id,
                                  key_name = keypair.name,
 '''
 
+#####  -------  SLAVE CONFIG --------- #####
 
+print "Slave config setup"
+# Image
+print "What image do you want to use for your slave setup? Suggested:[Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
+image = raw_input(prompt)
+
+# flavor
+print "What flavor do you want to use for your slave setup? Suggested: [m1.medium]" 
+flavor = raw_input(prompt)
+
+# network
+print "What network do you want to use? Suggested: [ACC-Course-net]" 
+network = raw_input(prompt)
+
+# Image
+print "What keypair do you want to use?" 
+keypair = raw_input(prompt)
+
+# Amount of slaves that you wish to spawn
+print "How many slaves do you want to setup for processing your data?" 
+slave_amount = raw_input(prompt)
+
+
+slave_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair, "slave_amount": slave_amount}
+
+
+
+print """
+image: %r 
+flavor %r 
+network: %r 
+keypair %r 
+slave_amount %r
+""" % (image, flavor, network, keypair, slave_amount)
+
+print slave_config_dict
+
+'''
+image =                          image.id, 
+                                 flavor = flavor.id, 
+                                 network = network.id, 
+                                 key_name = keypair.name,
+'''
+
+#return server_config_dict, slave_config_dict, config_dict
 
 
 
