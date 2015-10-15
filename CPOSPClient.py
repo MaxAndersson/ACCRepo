@@ -2,17 +2,17 @@ import os
 import sys
 import time
 import logging
-from novaclient import client as novaclient
-from collections import OrderedDict
-import collections
-import installSoftware
+#from novaclient import client as novaclient
+#from collections import OrderedDict
+#import collections
+#import installSoftware
 
 #OPTION 1
 # Option for CLI interface that i look into: http://docs.openstack.org/developer/cliff/introduction.html
 #http://docs.openstack.org/developer/cliff/classes.html#cliff.app.App
 #sudo pip install cliff
 #https://github.com/kennethreitz/clint
-#Får det icke att fungera.. kollar mer senare.
+#Far det icke att fungera.. kollar mer senare.
 
 #OPTION 2
 #http://click.pocoo.org/5/
@@ -85,164 +85,124 @@ class OpenStackProvider(OpenStackBase):
 #Easywayout.
 from sys import argv
 
-prompt = '> '
-'''
-#AUTH
+def get_config_values():
+    prompt = '> '
+    #####  -------  CONFIG --------- #####
 
-print "AUTH setup"
-# AUTH_URL
-print "What is your auth_url?" 
-auth_url = raw_input(prompt)
+    print "CONFIG setup"
+    # user
+    print "What is your username?" 
+    user = raw_input(prompt)
 
-#USERNAME
-print "What is your username?" 
-username = raw_input(prompt)
+    #USERNAME
+    print "What is your key?" 
+    key = raw_input(prompt)
 
-#PASSWORD
-print "What is your password?" 
-password = raw_input(prompt)
+    #PASSWORD
+    print "What is your tenant_name?" 
+    tenant_name = raw_input(prompt)
 
-#TENANT_NAME
-print "What is your tenant_name?" 
-tenant_name = raw_input(prompt)
+    #TENANT_NAME
+    print "What is your authurl?" 
+    authurl = raw_input(prompt)
 
-auth_dict = {"auth_url" : auth_url, "username": username, "password": password, "tenant_name": tenant_name}
-
-
-print """
-auth_url: %r 
-username %r 
-password: %r 
-tenant_name %r 
-""" % (auth_url, username, password, tenant_name)
-
-print auth_dict
-'''
-'''
-config = {'user':os.environ['OS_USERNAME'], 
-          'key':os.environ['OS_PASSWORD'],
-          'tenant_name':os.environ['OS_TENANT_NAME'],
-          'authurl':os.environ['OS_AUTH_URL']}
-
-'''
-#####  -------  CONFIG --------- #####
-
-print "CONFIG setup"
-# user
-print "What is your username?" 
-user = raw_input(prompt)
-
-#USERNAME
-print "What is your key?" 
-key = raw_input(prompt)
-
-#PASSWORD
-print "What is your tenant_name?" 
-tenant_name = raw_input(prompt)
-
-#TENANT_NAME
-print "What is your authurl?" 
-authurl = raw_input(prompt)
-
-config_dict = {"username" : user, "api_key": key, "project_id": tenant_name, "auth_url": authurl}
+    config_dict = {"username" : user, "api_key": key, "project_id": tenant_name, "auth_url": authurl}
 
 
 
-print """
-user: %r 
-key %r 
-auth_url: %r 
-authurl %r 
-""" % (user, key, tenant_name, authurl)
+    print """
+    user: %r 
+    key %r 
+    auth_url: %r 
+    authurl %r 
+    """ % (user, key, tenant_name, authurl)
 
-print config_dict
+    print config_dict
 
-#####  -------  SERVER CONFIG --------- #####
+    #####  -------  SERVER CONFIG --------- #####
 
-print "IMAGE config setup"
-# Image
-print "What image do you want to use? Suggested: [Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
-image = raw_input(prompt)
+    print "IMAGE config setup"
+    # Image
+    print "What image do you want to use? Suggested: [Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
+    image = raw_input(prompt)
 
-# flavor
-print "What flavor do you want to use? Suggested: [m1.medium]" 
-flavor = raw_input(prompt)
+    # flavor
+    print "What flavor do you want to use? Suggested: [m1.medium]" 
+    flavor = raw_input(prompt)
 
-# network
-print "What network do you want to use? Suggested: [ACC-Course-net]" 
-network = raw_input(prompt)
+    # network
+    print "What network do you want to use? Suggested: [ACC-Course-net]" 
+    network = raw_input(prompt)
 
-# Image
-print "What keypair do you want to use?" 
-keypair = raw_input(prompt)
+    # Image
+    print "What keypair do you want to use?" 
+    keypair = raw_input(prompt)
 
-server_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair}
-
-
-
-print """
-image: %r 
-flavor %r 
-network: %r 
-keypair %r 
-""" % (image, flavor, network, keypair)
-
-print server_config_dict
-
-'''
-image =                          image.id, 
-                                 flavor = flavor.id, 
-                                 network = network.id, 
-                                 key_name = keypair.name,
-'''
-
-#####  -------  SLAVE CONFIG --------- #####
-
-print "Slave config setup"
-# Image
-print "What image do you want to use for your slave setup? Suggested:[Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
-image = raw_input(prompt)
-
-# flavor
-print "What flavor do you want to use for your slave setup? Suggested: [m1.medium]" 
-flavor = raw_input(prompt)
-
-# network
-print "What network do you want to use? Suggested: [ACC-Course-net]" 
-network = raw_input(prompt)
-
-# Image
-print "What keypair do you want to use?" 
-keypair = raw_input(prompt)
-
-# Amount of slaves that you wish to spawn
-print "How many slaves do you want to setup for processing your data?" 
-slave_amount = raw_input(prompt)
-
-
-slave_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair, "slave_amount": slave_amount}
+    server_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair}
 
 
 
-print """
-image: %r 
-flavor %r 
-network: %r 
-keypair %r 
-slave_amount %r
-""" % (image, flavor, network, keypair, slave_amount)
+    print """
+    image: %r 
+    flavor %r 
+    network: %r 
+    keypair %r 
+    """ % (image, flavor, network, keypair)
 
-print slave_config_dict
+    print server_config_dict
 
-'''
-image =                          image.id, 
-                                 flavor = flavor.id, 
-                                 network = network.id, 
-                                 key_name = keypair.name,
-'''
+
+    #####  -------  SLAVE CONFIG --------- #####
+
+    print "Slave config setup"
+    # Image
+    print "What image do you want to use for your slave setup? Suggested:[Ubuntu Server 14.04 LTS (Trusty Tahr)]" 
+    image = raw_input(prompt)
+
+    # flavor
+    print "What flavor do you want to use for your slave setup? Suggested: [m1.medium]" 
+    flavor = raw_input(prompt)
+
+    # network
+    print "What network do you want to use? Suggested: [ACC-Course-net]" 
+    network = raw_input(prompt)
+
+    # Image
+    print "What keypair do you want to use?" 
+    keypair = raw_input(prompt)
+
+    # Amount of slaves that you wish to spawn
+    print "How many slaves do you want to setup for processing your data?" 
+    slave_amount = raw_input(prompt)
+
+
+    slave_config_dict = {"image" : image, "flavor": flavor, "network": network, "key_name": keypair, "slave_amount": slave_amount}
+
+
+
+    print """
+    image: %r 
+    flavor %r 
+    network: %r 
+    keypair %r 
+    slave_amount %r
+    """ % (image, flavor, network, keypair, slave_amount)
+
+    print slave_config_dict
+
+    
+    #####  -------  PIPE CONFIG --------- #####
+    # What kind of
+    print "How many slaves do you want to setup for processing your data?" 
+    slave_amount = raw_input(prompt)
+
+
 
 #return server_config_dict, slave_config_dict, config_dict
 
 
+
+if __name__ == '__main__':
+    get_config_values()
 
 
