@@ -190,15 +190,23 @@ def get_config_values():
 
     print slave_config_dict
 
+
+# POTENTIALLY skip all the Client setup and run it more purely as a service
+
     
     #####  -------  PIPE CONFIG --------- #####
     # What kind of
     print "How many slaves do you want to setup for processing your data?" 
-    slave_amount = raw_input(prompt)
+    slave_amount = raw_input(prompt)            # We might wanna overrule this? Maybe 1 worker for 20 and 5 for 1000 or something...
 
 
+    print "What is the path to your files?" 
+    all_cellprofiler_files = raw_input(prompt)
 
-#return server_config_dict, slave_config_dict, config_dict
+    slave_config_dict = {"slave_amount" : slave_amount, "all_cellprofiler_files": all_cellprofiler_files}
+
+
+#return server_config_dict, slave_config_dict, config_dict, slave_config_dict
 
 
 
