@@ -51,38 +51,45 @@ class CPOSPServer(object):
             else:
                 ip = self._client.floating_ips.create(pool)
                 return ip
-    def _deploy_with_context():
+    def _deploy_with_context(self):
         try:
             self._ssh = client()
             self._ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            self._ssh.connect(ip,
+            self._ssh.connect(self._ip,
                             username = 'ubuntu',
-                            key_filename ='akey.pem')
+                            key_filename ='cposp_key.pem')
 
         except Exception as e:
-            raise e
-        for command in commands:
-        try:
-            print 'EXECUTEING: {}'.format(command)
-            (stdin,stdout,stderr) = ssh.exec_command(command)
-            if(stderr != None):
-                raise Exception(stderr)
-                #print stdout.read()
-                #print stderr.read()
+            print e ,self._ip
+            return
 
-        except Exception as e:
-            print 'Something went wrong while executeing commands:'.format(e)
+        for command in self._commands:
+            try:
+
+                (stdin,stdout,stderr) = self._ssh.exec_command(command)
+                
+                #if(stderr != None):
+                #    raise Exception(stderr)
+                print stdout.read()
+                print stderr.read()
+
+            except Exception as e:
+                print 'Something went wrong while executeing commands:'.format(e), stdout, stderr
 
 
     def _attach_floating_ip(self, pool = 'ext-net'):
-            while(self._server.status != 'ACTIVE'):
-                print 'Server Not Active Yet, Retrying in {} secounds'.format(3)
-                time.sleep()
+        #TODO status never changes
+        #    wait = 2
+        #    while(self._server.status != 'ACTIVE'):
+        #        print 'Server Not Active Yet, Retrying in {} secounds, Server Status {}'.format(wait, self._server.status)
+        #        time.sleep(wait)
+        #        wait = wait*2
             if(self._check_floating_ip_assignment(self._server) != None):
                 raise Exception('Server already has an floating IP')
             ip = self._get_floating_ip(pool)
             try:
                 self._server.add_floating_ip(ip.ip)
+                self._ip = ip.ip
                 return ip.ip
 
             except Exception as e:
@@ -90,7 +97,20 @@ class CPOSPServer(object):
             return ip.ip
 
     def _attach_security_group(self):
+        ##TODO Seperate security groups for master and slave
+        ports = [5672,15672]
+        security_group = [sg  for sg in self._client.security_groups.list() if sg.name == 'CPOSP']
+        if security_group == []:
+            security_group = self._client.security_groups.create('CPOSP','This security group is used by the CellProfiler OpenStack Provitioner')
+            for port in ports:
+                self._client.security_group_rules.create(security_group.id,ip_protocol='TCP',from_port = port,to_port=port)
+        else:
+            security_group = security_group.pop()
+        self._server.add_security_group(security_group.id)
+
         return
+
+
     def get_client(self):
         return _client
 
@@ -153,14 +173,27 @@ class CPOSPMaster(CPOSPServer):
 class CPOSPSlave(CPOSPServer):
     """docstring for CPOSPSlave """
 
-    def __init__(self,name):
-        super(self).__init__(name)
+    def __init__(self,name = 'CPOSPSlave'):
+        super(CPOSPSlave,self).__init__(name,
+                                self.__get_context(),
+                                self.get_server_config_defaults()
+                )
 
-    def __get_context(user):
+    def get_server_config_defaults(self):
+            return {
+        'name': 'CPOSPSlave',
+        'key_name' : self._get_key_pair().name,
+        'flavor' : self._client.flavors.find(name='m1.medium'),
+        'image' :self._client.images.find(name='Ubuntu Server 14.04 LTS (Trusty Tahr)'),
+        }
+    def __get_context(user = 'CPOSP'):
+        f = open('cposp_tasks.py')
+        aFile = f.readlines()
         return  [
                 'sudo apt-get update -y',
                 'sudo apt-get install python-pip -y',
                 'sudo apt-get install rabbitmq-server -y',
                 'sudo pip install celery',
+                'echo "{}" > tasks.py'.format(aFile)
                 #'celery worker -A tasks',
                ]
