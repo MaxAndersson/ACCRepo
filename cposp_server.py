@@ -4,6 +4,7 @@ from novaclient.client import Client
 import time
 import paramiko
 from paramiko import SSHClient as client
+import uuid
 
 class CPOSPServer(object):
     """Abstract Class"""
@@ -20,6 +21,7 @@ class CPOSPServer(object):
             return None
         self._commands = context_commands
         self._server_config = server_config
+
     #    if(self._check_server_name(name) == False):
     #        print 'There is already an instance running with name: {}'.format(name)
     #        return None
@@ -28,6 +30,9 @@ class CPOSPServer(object):
         return self
 
     def boot(self):
+        image = self.get_image()
+        if image != None:
+            self._server_config['image'] = image
         try:
             self._server = self._client.servers.create(**self._server_config)
         except Exception as e:
@@ -67,7 +72,7 @@ class CPOSPServer(object):
             try:
 
                 (stdin,stdout,stderr) = self._ssh.exec_command(command)
-                
+
                 #if(stderr != None):
                 #    raise Exception(stderr)
                 print stdout.read()
@@ -76,6 +81,8 @@ class CPOSPServer(object):
             except Exception as e:
                 print 'Something went wrong while executeing commands:'.format(e), stdout, stderr
 
+#    def _create_image(self, server = self._server, ):
+#        return
 
     def _attach_floating_ip(self, pool = 'ext-net'):
         #TODO status never changes
@@ -153,6 +160,14 @@ class CPOSPMaster(CPOSPServer):
         self._server_config)
         self.__user = user
         self.__password = password
+
+    def get_image(self):
+        try:
+            return self._client.images.find(name='CPOSPMaster')
+        except:
+            return None
+            pass
+
     def get_server_config_defaults(self):
         return {
     'name': 'CPOSPMaster',
@@ -164,6 +179,7 @@ class CPOSPMaster(CPOSPServer):
     def __get_context(self,user, password,vHost):
         return  [
                 'sudo apt-get update -y',
+                'echo "127.0.0.1       localhost {} {}.local" | sudo tee --append /etc/hosts > /dev/null'.format(vHost, vHost),
                 'sudo apt-get install rabbitmq-server -y',
                 'sudo rabbitmqctl add_user {0} {1}'.format(user,password),
                 'sudo rabbitmqctl add_vhost {0}'.format(vHost),
@@ -178,6 +194,13 @@ class CPOSPSlave(CPOSPServer):
                                 self.__get_context(),
                                 self.get_server_config_defaults()
                 )
+
+    def get_image(self):
+        try:
+            return self._client.images.find(name='CPOSPSlave')
+        except:
+            return None
+            pass
 
     def get_server_config_defaults(self):
             return {
@@ -194,6 +217,12 @@ class CPOSPSlave(CPOSPServer):
                 'sudo apt-get install python-pip -y',
                 'sudo apt-get install rabbitmq-server -y',
                 'sudo pip install celery',
-                'echo "{}" > tasks.py'.format(aFile)
+                'sudo apt-get install -y git python-h5py python-zmq python-matplotlib cython openjdk-7-jdk python-wxgtk2.8 python-scipy python-mysqldb python-vigra --fix-missing',
+                'export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64',
+                'export LD_LIBRARY_PATH=/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server:/usr/lib/jvm/java-7-openjdk-amd64:/usr/lib/jvm/java-7-openjdk-amd64/include',
+                'git clone https://github.com/CellProfiler/CellProfiler',
+                'cd CellProfiler/ || exit',
+                'git checkout 2.1.1',
+                #'echo "{}" > tasks.py'.format(aFile)
                 #'celery worker -A tasks',
                ]

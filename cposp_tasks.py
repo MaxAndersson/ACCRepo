@@ -5,15 +5,12 @@ import swiftclient.client
 
 
 #Celery app object
-celeryapp = Celery('tasks', backend='amqp', broker='amqp://')
+celeryapp = Celery('tasks', backend='amqp', broker='amqp://CPOSP:CPOSP@CPOSP')
 
 
-
-
-def main():
-	
-	
-return "Done"
+@celeryapp.task()
+def aTask():
+	return "Something"
 
 
 
@@ -25,31 +22,3 @@ def getandpartitionData():
 
 
     return tasks.countMentionInTweetFile.delay(aFile,words)
-
-
-
-#Running celery worker server:
-# celery -A tasks.celeryapp worker --loglevel=info
-
-@celeryapp.task(bind = True, name = "cellprofiler")   						
-def cellprofiler_work(file, output):
-	x=1
-	return x
-
-
-
-#load and source rc file? 
-# Hämta data  (från public object storage)
-# Separera datan..?
-# Köra cellprofiler
-# Forsla ut data igen!   Vilket format... csv eller mysql?
-# Till databas eller concata csv filer
-# Till public object storage?
-
-
-
-
-
-
-if __name__ == '__main__':
-    main()
