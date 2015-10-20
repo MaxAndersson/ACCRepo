@@ -53,7 +53,7 @@ def cposp_work(self,input_url,chunks,output_config,output_name):
     for url in urls:
         f.write(url + '\n')
     f.close()
-    os.popen('docker run --rm -v {}:/input -v {}:/output  cellprofiler/cellprofiler:master -i /input -o /output -p /input/{} --file-list=/input/{}'.format(input_path,output_path,pipline_name,filelist_name))
+    os.popen('sudo docker run --rm -v {}:/input -v {}:/output  cellprofiler/cellprofiler:master -i /input -o /output -p /input/{} --file-list=/input/{}'.format(input_path,output_path,pipline_name,filelist_name))
     outputs = os.listdir('../output')
     for output_file in outputs:
         conn.put_object(output_name,'/part-' + self.request.id +'/' + output_file,open('../output/' + output_file ))
