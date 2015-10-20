@@ -19,10 +19,10 @@ def aTask():
 	return "Something"
 
 
-def downloadFile(url):
+def downloadFile(url,path):
     file_name = url.split('/')[-1]
     u = urllib2.urlopen(url)
-    f = open(file_name, 'wb')
+    f = open(path + file_name, 'wb')
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])
     print "Downloading: %s Bytes: %s" % (file_name, file_size)
@@ -40,23 +40,39 @@ def downloadFile(url):
     f.close()
     return file_name
 
+def make_path(name,request_id):
+        namespace = name + '-' + request_id
+        if os.path.exists(namespace):
+                return namespace
+        else:
+                os.makedirs(namespace)
+                return namespace 
+def has_pipeline(url,input_path, name):
+        local_path = input_path + '/' + name 
+        if os.path(local_path):
+                return local_path
+        else:
+                remote_path = url + name
+                downloadFile(remote_path, input_path)
+                return local_path
 
 @celery.task(bind=True)
 def cposp_work(self,input_url,chunks,output_config,output_name):
     urls= [input_url + chunk for chunk in chunks]
     conn = swiftclient.client.Connection( **output_config)
-    input_path =  '$(pwd)/../input'
-    output_path = '$(pwd)/../output'
-    pipline_name = 'CP_translocation_pipeline.cppipe'
-    filelist_name = 'filelist.txt'
-    f = open('../input/{}'.format(filelist_name),'wr')
+    input_path =  make_path('input')
+    output_path = make_path('output')
+    pipline_path = has_pipeline(input_url,input_path, 'CP_translocation_pipeline.cppipe') ## Get pipeline from master instead.
+    filelist_path = input_path + '/' + 'filelist.txt' 
+
+    f = open(filelist_name,'wr')
     for url in urls:
         f.write(url + '\n')
     f.close()
-    os.popen('sudo docker run --rm -v {}:/input -v {}:/output  cellprofiler/cellprofiler:master -i /input -o /output -p /input/{} --file-list=/input/{}'.format(input_path,output_path,pipline_name,filelist_name))
+    os.popen('sudo docker run --rm -v {}:/input -v {}:/output  cellprofiler/cellprofiler:master -i /input -o /output -p {} --file-list=/input/{}'.format(input_path,output_path,pipline_path,filelist_path))
     outputs = os.listdir('../output')
     for output_file in outputs:
-        conn.put_object(output_name,'/part-' + self.request.id +'/' + output_file,open('../output/' + output_file ))
+        conn.put_object(output_name,output_path +'/' + output_file,open(output_path + '/' + output_file ))
 
 def map_data(input_url= None,output_url = None, chunk_size = 10):
     client_config = os.environ
