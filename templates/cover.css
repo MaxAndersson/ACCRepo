@@ -20,6 +20,14 @@ a:hover {
 }
 
 
+/* Dropdown   */
+
+
+.dropdown-menu {
+  min-width:auto;
+  width:100%;
+}
+
 /*
  * Base structure
  */

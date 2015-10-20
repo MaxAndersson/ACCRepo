@@ -72,10 +72,12 @@ def index():
     ##Not Sourced
     name = 'CPOSP'
 
-    containers = {'name11': u'Cell13', 'name12': u'CellP-data', 'name13': u'CellP-output', 'name16': u'Cellprof', 'name17': u'FarezCon', 'name19': u'JustAnotherContainer', 'name78': u'testContainer_Saim', 'name79': u'testContainerrrr', 'name72': u'my_bucket_01', 'name73': u'noaabukk', 'name70': u'my-test-bucket', 'name71': u'my_bucket', 'name76': u'saim-bucket', 'name77': u'testContainer', 'name74': u'ruul_bucket_ah', 'name75': u'ryman', 'name86': u'tweets', 'name85': u'testcontainerr', 'name84': u'testcontainerS', 'name83': u'testcontainerKalle', 'name82': u'testcontainerAndrew', 'name81': u'testcontainer2', 'name80': u'test_bucket', 'name69': u'molns_storage_44913206-6722-417e-a20f-5d855938cab9', 'name68': u'lufr2071', 'name61': u'lab2ML_45686723-e3ab-46e4-97f7-7bfad4c8fe7b', 'name60': u'lab2ML_35344db4-c626-4e8c-917d-93c8682c6175', 'name63': u'lab2ML_c68f173d-36e7-4d47-bb2d-3337aeab1ee2', 'name62': u'lab2ML_6d0f0d8f-5255-49f5-a3ac-89bf6190a415', 'name65': u'lab2ML_e0439fec-19d0-4d60-984e-2bf6422c353e', 'name64': u'lab2ML_dd159c4a-5954-44c2-a797-04e7bd516c51', 'name67': u'lufr', 'name66': u'ljoni2138', 'name6': u'A_b989361a-b156-4eb7-b0c2-f747aa13ae31', 'name7': u'CPOSP-input', 'name4': u'AJ_bc9904ef-9f6d-4c87-b2d8-ed8bbe9ac8e4', 'name5': u'A_a8b211e2-d7e0-4016-bf30-2075ad07158e', 'name2': u'AJ_48c95173-4b77-467d-aa64-c934f3efeb5a', 'name3': u'AJ_5cda2de6-f80c-40db-9ab6-d189dd1946fb', 'name0': u'ACCA', 'name1': u'ACC_T16', 'name8': u'CPOSP-output}
 
+    #Just for testing DELETE
+    containers = {'name0': u'Cell13','name1': u'Cellprof','name2': u'tweets', 'name3': u'CPOSP-input', 'name4': u'ACCA', 'name5': u'CPOSP-output'}
 
-'''
+    #Add when deploying
+    '''
     #Container dict
     # List containers
     containers = {}
@@ -86,7 +88,7 @@ def index():
         key = 'name'+str(xkey)
         containers[key] = bucket['name']
         xkey +=1
-'''
+    '''
     return render_template('index.html', name=name, containers = containers) # containers = containers)
 
 @app.route('/checkAddress')
