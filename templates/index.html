@@ -9,17 +9,8 @@
 <!-- Optional theme <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css"> -->
  <link href="http://getbootstrap.com/examples/cover/cover.css" rel="stylesheet">
  <link href="https://cdn.jsdelivr.net/xcharts/0.1.3/xcharts.min.css" rel ="stylesheet">
-<style>
-.graph {
-min-height: 400px;
-min-width: 400px;
-}
 
 
-</style>
-</style>
-
-</style>
 </head>
 <body>
   <div class="site-wrapper">
@@ -30,7 +21,7 @@ min-width: 400px;
 
          <div class="masthead clearfix">
            <div class="inner">
-             <h3 class="masthead-brand">CellProfiler for Openstack</h3>
+         <!--    <h3 class="masthead-brand">CellProfiler for Openstack</h3>   -->
              <nav>
                <ul class="nav masthead-nav">
                  <li class="active"><a href="#"></a></li>
@@ -42,33 +33,55 @@ min-width: 400px;
          </div>
 
          <div class="inner cover">
+              <h3 class="masthead-brand">CellProfiler for Openstack</h3>
 
-           <h1 class="cover-heading">Please provide credentials.</h1>
-           <p class="lead">To connect your cloud you will need your Openstack Identity Service URL</p>
-           <p id="hej"></p>
-  <form>
+
+
+<form>
   <div class="form-group">
-    <label for="exampleInputEmail1">URL to Openstack Identity Service Provider</label>
-    <input type="email" class="form-control" id="identity" placeholder="http://smog.uppmax.uu.se:5000/v2.0" value="http://smog.uppmax.uu.se:5000/v2.0"value="">
+    <label for="exampleInputEmail1">URL to Openstack INPUT container</label>
+    <input type="adress" class="form-control" id="identity" placeholder="http://smog.uppmax.uu.se:8080/swift/v1/CPOSP-input" value="http://smog.uppmax.uu.se:8080/swift/v1/CPOSP-input"value="">
   </div>
   <div class="form-group">
-    <label for="exampleInputEmail1">Username</label>
-    <input type="username" class="form-control" id="username" placeholder="Username">
+    <label for="exampleInputEmail1">URL to Openstack OUTPUT container</label>
+    <input type="adress" class="form-control" id="identity" placeholder="http://smog.uppmax.uu.se:8080/swift/v1/CPOSP-output" value="http://smog.uppmax.uu.se:8080/swift/v1/CPOSP-output"value="">
   </div>
   <div class="form-group">
-    <label for="exampleInputPassword1">Password</label>
-    <input type="password" class="form-control" id="password" placeholder="Password">
+    <label for="exampleInputPassword1">Local folder with Cellprofiler data</label>
+    <input type="folder" class="form-control" id="identity" placeholder="/Users/cellprofiler/images"
+        value="/Users/cellprofiler/images"value="">
   </div>
-  <button type="submit" class="btn btn-default">Submit</button>
+  <!-- DROPDOWN input    -->
+  <div class="dropdown" style="margin:10px" >
+    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+      Dropdown
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+      <li><a href="#">Action</a></li>
+      <li><a href="#">Another action</a></li>
+      <li><a href="#">Something else here</a></li>
+      <li><a href="#">Separated link</a></li>
+    </ul>
+  </div>
+
+<!-- DROPDOWN input    -->
+
+
+
+
+  <button type="submit" class="btn btn-default">Submit CPOSP request</button>
 </form>
-        </br>
-            <figure class="col-md-12 graph" id="example1"></figure>
-                </br>
+
+
+
+         <p style="margin:10px;">Run Cellprofiler in the Cloud </p>
            <p class="lead">
-             <a href="/countwords" class="btn btn-lg btn-default">Count Words</a>
+             
+             <a href="/CPOSP" class="btn btn-lg btn-default">RUN CPOSP</a>
            </p>
          </div>
-
+          
          <div class="mastfoot">
            <div class="inner">
 
