@@ -21,8 +21,12 @@ def aTask():
 
 def downloadFile(url,path):
     file_name = url.split('/')[-1]
+    print url
+    download_path = path 
+    print 'filename:' + file_name, 'download_path:' + download_path
+
     u = urllib2.urlopen(url)
-    f = open(path + file_name, 'wb')
+    f = open(download_path, 'wb')
     meta = u.info()
     file_size = int(meta.getheaders("Content-Length")[0])
     print "Downloading: %s Bytes: %s" % (file_name, file_size)
@@ -41,19 +45,22 @@ def downloadFile(url,path):
     return file_name
 
 def make_path(name,request_id):
-        namespace = name + '-' + request_id
+        namespace = name + '-' + request_id + '/'
+	print namespace
         if os.path.exists(namespace):
+		
                 return namespace
         else:
-                os.makedirs(namespace)
+                os.makedirs(namespace, 0777)
                 return namespace
 def has_pipeline(url,input_path, name):
-        local_path = input_path + '/' + name
+        local_path = input_path + name
+	print local_path
         if os.path.exists(local_path):
                 return local_path
         else:
                 remote_path = url + name
-                downloadFile(remote_path, input_path)
+                downloadFile(remote_path, local_path)
                 return local_path
 
 @celery.task(bind=True)
@@ -63,16 +70,23 @@ def cposp_work(self,input_url,chunks,output_config,output_name):
     conn = swiftclient.client.Connection( **output_config)
     input_path =  make_path('input',request_id)
     output_path = make_path('output',request_id)
-    pipeline_path = has_pipeline(input_url,input_path, 'CP_translocation_pipeline.cppipe') ## Get pipeline from master instead.
-    filelist_path = input_path + '/' + 'filelist.txt'
-    print input_path,output_path,pipeline_path,filelist_path
+    metadata_name = 'TranslocationDataMetadata.csv'
+    pipeline_name = 'CP_translocation_pipeline.cppipe'
+    filelist_name = 'filelist.txt'
+    metadata_path = has_pipeline(input_url,input_path, metadata_name)
+    pipeline_path = has_pipeline(input_url,input_path, pipeline_name) ## Get pipeline from master instead.
+    filelist_path = input_path  + filelist_name
+    print 'input_path : ' + input_path
+    print 'output_path : ' + output_path
+    print 'pipeline_path : ' + pipeline_path
+    print 'filelist_path : ' + filelist_path
 
     f = open(filelist_path,'wr')
     for url in urls:
         f.write(url + '\n')
     f.close()
 
-    command = 'docker run -v {}:/input -v {}:/output cellprofiler/cellprofiler:master -i /input -o /output -p {} --file-list=/input/{}'.format(input_path,output_path,pipeline_path,filelist_path)
+    command = 'sudo docker run -v $(pwd)/{}:/input -v $(pwd)/{}:/output cellprofiler/cellprofiler:master -i /input -o /output -p /input/{} --file-list=/input/{}'.format(input_path,output_path,pipeline_name,'filelist.txt')
     print 'Executeing : ', command
     a = os.popen(command).read()
     print a
