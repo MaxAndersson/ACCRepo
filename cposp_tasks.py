@@ -46,9 +46,9 @@ def make_path(name,request_id):
                 return namespace
         else:
                 os.makedirs(namespace)
-                return namespace 
+                return namespace
 def has_pipeline(url,input_path, name):
-        local_path = input_path + '/' + name 
+        local_path = input_path + '/' + name
         if os.path.exists(local_path):
                 return local_path
         else:
@@ -63,14 +63,19 @@ def cposp_work(self,input_url,chunks,output_config,output_name):
     conn = swiftclient.client.Connection( **output_config)
     input_path =  make_path('input',request_id)
     output_path = make_path('output',request_id)
-    pipline_path = has_pipeline(input_url,input_path, 'CP_translocation_pipeline.cppipe') ## Get pipeline from master instead.
-    filelist_path = input_path + '/' + 'filelist.txt' 
+    pipeline_path = has_pipeline(input_url,input_path, 'CP_translocation_pipeline.cppipe') ## Get pipeline from master instead.
+    filelist_path = input_path + '/' + 'filelist.txt'
     print input_path,output_path,pipeline_path,filelist_path
+
     f = open(filelist_path,'wr')
     for url in urls:
         f.write(url + '\n')
     f.close()
-    os.popen('sudo docker run -v {}:/input -v {}:/output  cellprofiler/cellprofiler:master -i /input -o /output -p {} --file-list=/input/{}'.format(input_path,output_path,pipline_path,filelist_path))
+
+    command = 'docker run -v {}:/input -v {}:/output cellprofiler/cellprofiler:master -i /input -o /output -p {} --file-list=/input/{}'.format(input_path,output_path,pipeline_path,filelist_path)
+    print 'Executeing : ', command
+    a = os.popen(command).read()
+    print a
     outputs = os.listdir(output_path)
     for output_file in outputs:
         conn.put_object(output_name,output_path +'/' + output_file,open(output_path + '/' + output_file ))
@@ -96,19 +101,17 @@ def map_data(input_url= None,output_url = None, chunk_size = 10):
     file_length = len(files)
     chunks_count = file_length/chunk_size
     rest = file_length%chunk_size
-    
+
     for index in range(0,chunks_count):
-    
+
         start = chunk_size * index
         stop = chunk_size * (index+1)
         if index == chunks_count-1 and rest != 0:
             stop = stop + rest-1 ## VERRY VERRY BADDD BOY !
         cposp_work.delay(input_bucketURL,files[start:stop],config,output_name)
-    
+
 
 #    results = [cellprofiler_work(aFile, output_bucketURL) for aFile in files]
 
 
  #   return tasks.countMentionInTweetFile.delay(aFile,words)
-
-
