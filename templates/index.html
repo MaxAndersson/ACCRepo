@@ -55,11 +55,10 @@
   <!-- DROPDOWN input    -->
   <div class="dropdown" style="margin:10px">
     <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-      Dropdown
+      Containers available in the smog cloud
       <span class="caret"></span>
     </button>
-    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-
+    <ul class="dropdown-menu scrollable-menu" aria-labelledby="dropdownMenu1">
       {% for container in containers.values() %}
       <li><a href="#">{{container}}</a></li>
       {% endfor %}

@@ -23,9 +23,19 @@ a:hover {
 /* Dropdown   */
 
 
-.dropdown-menu {
-  min-width:auto;
-  width:100%;
+.dropdown-list{
+    max-height: 187px;
+    overflow: auto;
+    top: 33px;
+    position: relative;
+    left: 50px;
+    box-shadow:none;
+}
+
+.scrollable-menu {
+    height: auto;
+    max-height: 200px;
+    overflow-x: hidden;
 }
 
 /*

@@ -21,15 +21,15 @@ app = Flask(__name__)
 
 # Need to Source on master
 
-'''
-config = {'user':os.environ['OS_USERNAME'], 
-          'key':os.environ['OS_PASSWORD'],
-          'tenant_name':os.environ['OS_TENANT_NAME'],
-          'authurl':os.environ['OS_AUTH_URL']}
+def smog_conn():
+    config = {'user':os.environ['OS_USERNAME'], 
+              'key':os.environ['OS_PASSWORD'],
+              'tenant_name':os.environ['OS_TENANT_NAME'],
+              'authurl':os.environ['OS_AUTH_URL']}
 
-conn = swiftclient.client.Connection(auth_version=2, **config)
-nc = Client('2',**config)
-'''
+    conn = swiftclient.client.Connection(auth_version=2, **config)
+    nc = Client('2',**config)
+
 
 def list_containers():
     # List containers
@@ -72,12 +72,20 @@ def index():
     ##Not Sourced
     name = 'CPOSP'
 
+    config = {'user':os.environ['OS_USERNAME'], 
+              'key':os.environ['OS_PASSWORD'],
+              'tenant_name':os.environ['OS_TENANT_NAME'],
+              'authurl':os.environ['OS_AUTH_URL']}
 
+    conn = swiftclient.client.Connection(auth_version=2, **config)
+    nc = Client('2',**config)
+    
+    #smog_conn()
     #Just for testing DELETE
-    containers = {'name0': u'Cell13','name1': u'Cellprof','name2': u'tweets', 'name3': u'CPOSP-input', 'name4': u'ACCA', 'name5': u'CPOSP-output'}
+    #containers = {'name0': u'Cell13','name1': u'Cellprof','name2': u'tweets', 'name3': u'CPOSP-input', 'name4': u'ACCA', 'name5': u'CPOSP-output'}
 
     #Add when deploying
-    '''
+    
     #Container dict
     # List containers
     containers = {}
@@ -88,7 +96,7 @@ def index():
         key = 'name'+str(xkey)
         containers[key] = bucket['name']
         xkey +=1
-    '''
+    
     return render_template('index.html', name=name, containers = containers) # containers = containers)
 
 @app.route('/checkAddress')
