@@ -15,11 +15,15 @@ class CPOSPServer(object):
     _server_config = None
 
 
-    def __init__(self, name, context_commands, server_config):
+    #def __init__(self, name, context_commands, server_config):
+    def __init__(self,name,server_config):
         if(self._client == None):
-            print 'Please run the CPOSPServer.factory(client_config=os.eviron) method first to configure the client'
+            try:
+                CPOSPServer.factory()
+            except Exception as e:
+                raise Execption('Could not find credentials')
             return None
-        self._commands = context_commands
+        #self._commands = context_commands
         self._server_config = server_config
 
     #    if(self._check_server_name(name) == False):
@@ -32,13 +36,21 @@ class CPOSPServer(object):
     def boot(self):
         image = self.get_image()
         if image != None:
+            self._contexulize = False
             self._server_config['image'] = image
+        else:
+            self._contexulize = True
         try:
+            self._id = uuid.uuid1()
+            self._server_config['userdata'] = self._get_contextulizeation()
+            self._server_config['name'] = self._server_config['name'] + '-' + str(self._id)
+            print self._server_config
             self._server = self._client.servers.create(**self._server_config)
         except Exception as e:
             raise Exception('Booting Problem: {}'.format(e))
 
         return True
+
     def _check_floating_ip_assignment(self,server):
         try:
             floating_ip = [ip for ip in self._client.floating_ips.list() if ip.instance_id == self._server.id ].pop().ip
@@ -105,7 +117,7 @@ class CPOSPServer(object):
 
     def _attach_security_group(self):
         ##TODO Seperate security groups for master and slave
-        ports = [5672,15672]
+        ports = [5672,15672,5000]
         security_group = [sg  for sg in self._client.security_groups.list() if sg.name == 'CPOSP']
         if security_group == []:
             security_group = self._client.security_groups.create('CPOSP','This security group is used by the CellProfiler OpenStack Provitioner')
@@ -156,14 +168,34 @@ class CPOSPMaster(CPOSPServer):
         self._server_config = self.get_server_config_defaults() ## or take user input from client
 
         super(CPOSPMaster,self).__init__(name,
-        self.__get_context(user,password,vHost),
+        #self.__get_context(user,password,vHost),
         self._server_config)
         self.__user = user
         self.__password = password
+        CPOSPSlave._master = self
+
+    def _get_contextulizeation(self):
+        if(self._contexulize):
+            f = open('master.sh')
+            context = f.readline() + "" + f.read()
+            f.close()
+            return context
+        else:
+            f = open('master_run.sh')
+            context = f.readline() + "" + f.read()
+            f.close()
+            return context
+
+    def boot(self):
+        super(CPOSPMaster,self).boot()
+        self._attach_security_group()
+        self._attach_floating_ip()
+
+
 
     def get_image(self):
         try:
-            return self._client.images.find(name='CPOSPMaster')
+            return self._client.images.find(name='CPOSPMaster-Image')
         except:
             return None
             pass
@@ -188,16 +220,49 @@ class CPOSPMaster(CPOSPServer):
 
 class CPOSPSlave(CPOSPServer):
     """docstring for CPOSPSlave """
+    _master = None
 
     def __init__(self,name = 'CPOSPSlave'):
         super(CPOSPSlave,self).__init__(name,
-                                self.__get_context(),
+    #                            self.__get_context(),
                                 self.get_server_config_defaults()
                 )
 
+
+
+    def _get_contextulizeation(self):
+        apo = CPOSPServer._client.servers.ips(self._master.id)
+        key = apo.keys().pop()
+        master_ip = apo[key].pop()['addr']
+        if(self._contexulize):
+
+            f = open('slave.sh')
+            context = f.readline() + "MASTER_IP='{}' \n".format(master_ip) + f.read()
+            f.close()
+            return context
+        else:
+            f = open('slave_run.sh')
+            context = f.readline() + "MASTER_IP='{}' \n".format(master_ip) + f.read()
+            f.close()
+            return context
+
+    def boot(self):
+        super(CPOSPSlave,self).boot()
+
+
+    @classmethod
+    def boot_n(cls,n_slaves = 1):
+        try:
+            servers = [CPOSPSlave() for i in range(0,n_slaves)]
+            booted_servers = [server.boot() for server in servers]
+            return [server._server for server in servers]
+        except Exception as e:
+            raise
+
+
     def get_image(self):
         try:
-            return self._client.images.find(name='CPOSPSlave')
+            return self._client.images.find(name='CPOSPSlave-Image')
         except:
             return None
             pass
