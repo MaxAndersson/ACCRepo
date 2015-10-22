@@ -37,16 +37,17 @@ def list_containers():
     #for bucket in bucket_list:
     #    print bucket['name']
 
+
 # UPLOAD PATH or listed files to container
 '''
 def upload_path():              
 
     import glob
 
-    path = os.getcwd()
-    print path
+    #path = os.getcwd()
+    #print path
 
-    #os.chdir('/Users/systemx/Desktop/cloud/projekt/cellprofilerfiles')
+    #os.chdir('/Users/systemx/Desktop/cloud/projekt/cellprofilerfiles')   #Directory set by user!?
 
 
     cellprofilerpics = glob.glob('*.BMP')
@@ -58,7 +59,7 @@ def upload_path():
         conn.put_object("CPOSP-input", files, testfile)
 
     
-    print "success"
+    #print "success"
 '''
 
 
@@ -87,8 +88,8 @@ def index():
     #Add when deploying
     
     #Container dict
-    # List containers
     containers = {}
+    # List containers
     (response, bucket_list) = conn.get_account()
     #print bucket_list
     xkey = 0
