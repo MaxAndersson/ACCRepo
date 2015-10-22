@@ -186,6 +186,7 @@ class CPOSPMaster(CPOSPServer):
             f.close()
             return context
 
+
     def boot(self):
         super(CPOSPMaster,self).boot()
         self._attach_security_group()

@@ -5,6 +5,7 @@ import swiftclient.client
 import keystoneclient
 from itertools import islice
 import urllib2
+import re
 #Celery app object
 celery = Celery('tasks', backend='amqp', broker='amqp://')
 # broker='amqp://CPOSP:CPOSP@CPOSP')
@@ -22,7 +23,7 @@ def aTask():
 def downloadFile(url,path):
     file_name = url.split('/')[-1]
     print url
-    download_path = path 
+    download_path = path
     print 'filename:' + file_name, 'download_path:' + download_path
 
     u = urllib2.urlopen(url)
@@ -48,7 +49,7 @@ def make_path(name,request_id):
         namespace = name + '-' + request_id + '/'
 	print namespace
         if os.path.exists(namespace):
-		
+
                 return namespace
         else:
                 os.makedirs(namespace, 0777)
@@ -64,14 +65,14 @@ def has_pipeline(url,input_path, name):
                 return local_path
 
 @celery.task(bind=True)
-def cposp_work(self,input_url,chunks,output_config,output_name):
+def cposp_work(self,input_url,chunks,task_meta,output_config,output_name):
     request_id = self.request.id
     urls= [input_url + chunk for chunk in chunks]
     conn = swiftclient.client.Connection( **output_config)
     input_path =  make_path('input',request_id)
     output_path = make_path('output',request_id)
-    metadata_name = 'TranslocationDataMetadata.csv'
-    pipeline_name = 'CP_translocation_pipeline.cppipe'
+    metadata_name = task_meta['metadata_name'] #'TranslocationDataMetadata.csv'
+    pipeline_name = task_meta['pipeline_name']	#'CP_translocation_pipeline.cppipe'
     filelist_name = 'filelist.txt'
     metadata_path = has_pipeline(input_url,input_path, metadata_name)
     pipeline_path = has_pipeline(input_url,input_path, pipeline_name) ## Get pipeline from master instead.
@@ -94,38 +95,30 @@ def cposp_work(self,input_url,chunks,output_config,output_name):
     for output_file in outputs:
         conn.put_object(output_name,output_path +'/' + output_file,open(output_path + '/' + output_file ))
 
-def map_data(input_url= None,output_url = None, chunk_size = 10):
-    client_config = os.environ
-    config = {
-                'user' : client_config['OS_USERNAME'],
-                'key' : client_config['OS_PASSWORD'],
-                'tenant_name' : client_config['OS_TENANT_NAME'],
-                'authurl' : client_config['OS_AUTH_URL'],
-                'auth_version': 2,
-    }
-    #
-#    return [obj['name'] for obj in conn.get_account()[1]]
+def map_data(config,input_name='CPOSP-input',output_name ='CPOSP-output', chunk_size = 10, meta_data = None,slave_count = 1):
 
-    input_bucketURL = 'http://smog.uppmax.uu.se:8080/swift/v1/CPOSP-input/'
-    output_name = 'CPOSP-output'
-    #output_bucketURL = 'http://smog.uppmax.uu.se:8080/swift/v1/CPOSP-output/'
-    files = os.popen('curl {}'.format(input_bucketURL)).read().rsplit('\n')
-    #Apply image filter.
+	conn = swiftclient.client.Connection(**config)
+	url,_ = conn.get_auth()
+	(response, files) = conn.get_container(input_name)
+	# os.popen('curl {}'.format(input_url)).read().rsplit('\n')
+        #Apply image filter.
+	jpg = re.compile('*.BMP'); tiff = re.compile('*.TIFF'); pipe = re.compile('*.cppipe') ;csv = re.compile('*.csv')
+	files = [aFile for aFile in files if jpg.match(aFile) or tiff.match(aFile)]
+	tasks_meta = {}
+	for meta in meta_data:
+		if pipe.match(meta):
+			tasks_meta['pipeline_name'] = meta
+		elif csv.match(meta):
+			tasks_meta['metadata_name'] = meta
+        file_length = len(files)
+        chunks_count = file_length/chunk_size
+        rest = file_length%chunk_size
 
-    file_length = len(files)
-    chunks_count = file_length/chunk_size
-    rest = file_length%chunk_size
+        for index in range(0,chunks_count):
 
-    for index in range(0,chunks_count):
-
-        start = chunk_size * index
-        stop = chunk_size * (index+1)
-        if index == chunks_count-1 and rest != 0:
-            stop = stop + rest-1 ## VERRY VERRY BADDD BOY !
-        cposp_work.delay(input_bucketURL,files[start:stop],config,output_name)
-
-
-#    results = [cellprofiler_work(aFile, output_bucketURL) for aFile in files]
-
-
- #   return tasks.countMentionInTweetFile.delay(aFile,words)
+                start = chunk_size * index
+                stop = chunk_size * (index+1)
+                if index == chunks_count-1 and rest != 0:
+                        stop = stop + rest
+		#self,input_url,chunks,task_meta,output_config,output_name
+                cposp_work.delay(url +'/'+ input_name,files[start:stop],tasks_meta,config,output_name)

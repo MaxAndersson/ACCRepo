@@ -2,7 +2,7 @@
 #!flask/bin/python
 from flask import Flask, jsonify, render_template,request
 #from urllib.parse import urlparse
-import subprocess
+#import subprocess
 import sys
 import os
 import json
@@ -14,32 +14,28 @@ import time
 from keystoneclient.auth.identity import v2 as identity
 from keystoneclient import session
 from novaclient.client import Client
+from cposp_tasks import map_data
 
 
 app = Flask(__name__)
-
-
-# Need to Source on master
-
-def smog_conn():
-    config = {'user':os.environ['OS_USERNAME'], 
+config = {'user':os.environ['OS_USERNAME'],
               'key':os.environ['OS_PASSWORD'],
               'tenant_name':os.environ['OS_TENANT_NAME'],
-              'authurl':os.environ['OS_AUTH_URL']}
-
-    conn = swiftclient.client.Connection(auth_version=2, **config)
-    nc = Client('2',**config)
+              'authurl':os.environ['OS_AUTH_URL'],
+               'auth_version': 2}
 
 
-def list_containers():
-    # List containers
-    (response, bucket_list) = conn.get_account()
-    #for bucket in bucket_list:
-    #    print bucket['name']
+conn = swiftclient.client.Connection(**config)
 
-# UPLOAD PATH or listed files to container
-'''
-def upload_path():              
+@app.route('/objects/')
+def objects():
+    container = request.values.getlist('container').pop()
+    (response, ObjList) = conn.get_container(container)
+
+    return json.dumps([obj['name'] for obj in ObjList])
+
+
+def upload_path():
 
     import glob
 
@@ -57,47 +53,35 @@ def upload_path():
         testfile = test.read()
         conn.put_object("CPOSP-input", files, testfile)
 
-    
     print "success"
-'''
+
 
 
 
 @app.route('/', methods = ['GET'])
 def index():
-    ## Sourced Env
-
-
-
-    ##Not Sourced
-    name = 'CPOSP'
-
-    config = {'user':os.environ['OS_USERNAME'], 
-              'key':os.environ['OS_PASSWORD'],
-              'tenant_name':os.environ['OS_TENANT_NAME'],
-              'authurl':os.environ['OS_AUTH_URL']}
-
-    conn = swiftclient.client.Connection(auth_version=2, **config)
-    nc = Client('2',**config)
-    
-    #smog_conn()
-    #Just for testing DELETE
-    #containers = {'name0': u'Cell13','name1': u'Cellprof','name2': u'tweets', 'name3': u'CPOSP-input', 'name4': u'ACCA', 'name5': u'CPOSP-output'}
-
-    #Add when deploying
-    
-    #Container dict
-    # List containers
-    containers = {}
+    print conn.get_auth()
     (response, bucket_list) = conn.get_account()
-    #print bucket_list
-    xkey = 0
-    for bucket in bucket_list:
-        key = 'name'+str(xkey)
-        containers[key] = bucket['name']
-        xkey +=1
-    
-    return render_template('index.html', name=name, containers = containers) # containers = containers)
+    return render_template('index.html', containers = [container['name'] for container in bucket_list]) # containers = containers)
+
+@app.route('/run', methods = ['POST'])
+def run():
+    #config,input_name='CPOSP-input',output_name ='CPOSP-output', chunk_size = 10, meta_data = None
+    print(config,
+    request.form['input-container'],
+    request.args.get('output-container'),
+    request.args.get('chunk-size'),
+    request.args.getlist('meta-data'),
+    request.args.get('slave-count')
+    )
+    map_data(config,
+    request.args.get('input-container'),
+    request.args.get('output-container'),
+    request.args.get('chunk-size'),
+    request.args.getlist('meta-data'),
+    request.args.get('slave-count')
+    )
+    return redirect('http://130.238.29.171:5000/')
 
 @app.route('/checkAddress')
 def checkAddress():
