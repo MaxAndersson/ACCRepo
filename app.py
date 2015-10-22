@@ -39,10 +39,10 @@ def upload_path():
 
     import glob
 
-    path = os.getcwd()
-    print path
+    #path = os.getcwd()
+    #print path
 
-    #os.chdir('/Users/systemx/Desktop/cloud/projekt/cellprofilerfiles')
+    #os.chdir('/Users/systemx/Desktop/cloud/projekt/cellprofilerfiles')   #Directory set by user!?
 
 
     cellprofilerpics = glob.glob('*.BMP')
