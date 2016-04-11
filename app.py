@@ -23,6 +23,7 @@ config = {'user':os.environ['OS_USERNAME'],
               'tenant_name':os.environ['OS_TENANT_NAME'],
               'authurl':os.environ['OS_AUTH_URL'],
                'auth_version': 2}
+# hej !
 
 
 conn = swiftclient.client.Connection(**config)
